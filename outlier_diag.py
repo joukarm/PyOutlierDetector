@@ -105,11 +105,7 @@ class Window(QDialog, QMainWindow):
         ax4 = self.figure.add_subplot(224)
 
         assert isinstance(ax1, axes.Axes)
-        self.set_axes_labels(ax1)
-        self.set_axes_labels(ax2)
-        self.set_axes_labels(ax3)
-        self.set_axes_labels(ax4)
-
+        self.set_axes_labels((ax1, ax2, ax3, ax4))
 
         ax1.scatter(df['time'], df['rate'], color='green', s=5, label='All Production Data')
         ax1.scatter(dfnew['time'], dfnew['rate'], marker='o', c='red', alpha=0.4, s=dfnew['kval'] * 50)
@@ -141,9 +137,11 @@ class Window(QDialog, QMainWindow):
         # save_plot(f)
         self.print_time_report(calc_time, t_init)
 
-    def set_axes_labels(self, axis):
-        axis.set_xlabel('Time')
-        axis.set_ylabel('Rate')
+    @staticmethod
+    def set_axes_labels(axes):
+        for axis in axes:
+            axis.set_xlabel('Time')
+            axis.set_ylabel('Rate')
 
     @staticmethod
     def print_time_report(calc_time, t_init):
