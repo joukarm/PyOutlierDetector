@@ -139,6 +139,10 @@ class Window(QDialog, QMainWindow):
             " | ".join([f"Case Name: {self.cbcases.currentText()}",
                         f"STDDEV Multiplier: {self.spn_stddev_multiplier.text()}"]))
         # save_plot(f)
+        self.print_time_report(calc_time, t_init)
+
+    @staticmethod
+    def print_time_report(calc_time, t_init):
         overall_time = time.time() - t_init
         print(
             f"Overall Time: {overall_time:.2f} Sec  |  Calculation Time: {calc_time:.2f} Sec "
