@@ -146,7 +146,9 @@ class Window(QDialog, QMainWindow):
         overall_time = time.time() - t_init
         print(
             f"Overall Time: {overall_time:.2f} Sec  |  Calculation Time: {calc_time:.2f} Sec "
-            f"({calc_time / overall_time * 100:.0f}%)  |  Other: {overall_time - calc_time:.2f} Sec")
+            f"({calc_time / overall_time * 100:.0f}%)  |  Other: {overall_time - calc_time:.2f} Sec"
+            f""
+        )
 
 
 if __name__ == '__main__':
