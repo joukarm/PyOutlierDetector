@@ -5,11 +5,10 @@ from PyQt5 import QtGui
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib
+import matplotlib.axes._axes as axes
 from src.outlier import *
-import random
 import pandas as pd
 import glob
-import numpy as np
 
 
 class Window(QDialog, QMainWindow):
@@ -18,7 +17,6 @@ class Window(QDialog, QMainWindow):
         Window.resize(self, 1600, 900)
         Window.setWindowTitle(self, "Outlier Assistant")
         Window.setWindowIcon(self, QtGui.QIcon(r'src\icon.ico'))
-        # Window.setObjectName(self,"Mohammad")
         matplotlib.use('Agg')
         self.figure = plt.figure()
 
@@ -42,8 +40,7 @@ class Window(QDialog, QMainWindow):
             lambda: self.my_outlier_plot(self.cbcases.currentText(), self.spn_stddev_multiplier.value()))
 
         self.cbcases = QComboBox(self)
-        self.cbcases.setObjectName("cbcases")
-        for f in self.csvfiles():
+        for f in self.get_csv_files():
             self.cbcases.addItem(f)
         self.cbcases.setCurrentIndex(0)
         self.cbcases.currentIndexChanged.connect(
@@ -68,40 +65,36 @@ class Window(QDialog, QMainWindow):
         self.my_outlier_plot(self.cbcases.currentText(), self.spn_stddev_multiplier.value())
         # print(self.cbcases.currentText())
 
-    def csvfiles(self):
-        # os.chdir(r".")
+    @staticmethod
+    def get_csv_files():
         return [f for f in glob.glob(r"data\*.csv")]
-        pass
 
-    def my_outlier_plot(self, sampleName, stdDevMultiplier):
+    def my_outlier_plot(self, sample_name, stddev_multiplier):
         # stdDevMultiplier = 0.1
         t_init = time.time()
         self.figure.clear()
 
-        TopOutliersPercentageToRemove = 15
-        UseSTDDevMultiplier = True
+        top_outliers_percentage = 15
+        use_std_dev_multiplier = True
 
-        df = read_my_data(''.join([sampleName]))
-
-        # df['kval'] = np.zeros(len(df))
+        df = read_my_data(''.join([sample_name]))
 
         df['kval'] = [0, 0, 0] + [AvgNeighbourDiffSlopeDependent(df, i) for i in range(3, len(df) - 3)] + [0, 0, 0]
-
         df['kval'] = df['kval'] / max(df['kval'])
 
         calc_time = time.time() - t_init
-        show_statistics(df, sampleName)
+        show_statistics(df, sample_name)
 
-        if UseSTDDevMultiplier:
-            dfnew = GetOutliersUsingStdDevMultiplier(df, stdDevMultiplier)
+        if use_std_dev_multiplier:
+            dfnew = GetOutliersUsingStdDevMultiplier(df, stddev_multiplier)
         else:
-            dfnew = GetOutliersUsingPercentile(df, TopOutliersPercentageToRemove)
+            dfnew = GetOutliersUsingPercentile(df, top_outliers_percentage)
 
-        dfNoOutlier = pd.DataFrame({'time': [], 'rate': []})
+        df_no_outlier = pd.DataFrame({'time': [], 'rate': []})
 
         for d in df.values:
             if d not in dfnew.values:
-                dfNoOutlier = dfNoOutlier.append({'time': d[0], 'rate': d[1]}, ignore_index=True)
+                df_no_outlier = df_no_outlier.append({'time': d[0], 'rate': d[1]}, ignore_index=True)
 
         # instead of ax.hold(False)
         self.figure.clear()
@@ -111,6 +104,13 @@ class Window(QDialog, QMainWindow):
         ax3 = self.figure.add_subplot(223)
         ax4 = self.figure.add_subplot(224)
 
+        assert isinstance(ax1, axes.Axes)
+        self.set_axes_labels(ax1)
+        self.set_axes_labels(ax2)
+        self.set_axes_labels(ax3)
+        self.set_axes_labels(ax4)
+
+
         ax1.scatter(df['time'], df['rate'], color='green', s=5, label='All Production Data')
         ax1.scatter(dfnew['time'], dfnew['rate'], marker='o', c='red', alpha=0.4, s=dfnew['kval'] * 50)
 
@@ -119,11 +119,11 @@ class Window(QDialog, QMainWindow):
                     alpha=0.4,
                     s=dfnew['kval'] * 50)
 
-        ax3.scatter(dfNoOutlier['time'], dfNoOutlier['rate'], color='blue', marker='o', s=5,
+        ax3.scatter(df_no_outlier['time'], df_no_outlier['rate'], color='blue', marker='o', s=5,
                     label='Production Data Without Outliers')
         ax3.axes.set_ylim(ax2.axes.get_ylim())
 
-        ax4.plot(dfNoOutlier['time'], dfNoOutlier['rate'], label='Production Data Without Outliers')
+        ax4.plot(df_no_outlier['time'], df_no_outlier['rate'], label='Production Data Without Outliers')
         ax4.scatter(dfnew['time'], dfnew['rate'], color='red', label=f"Outliers ({len(dfnew)}/{len(df)})", marker='+',
                     s=dfnew['kval'] * 50)
 
@@ -140,6 +140,10 @@ class Window(QDialog, QMainWindow):
                         f"STDDEV Multiplier: {self.spn_stddev_multiplier.text()}"]))
         # save_plot(f)
         self.print_time_report(calc_time, t_init)
+
+    def set_axes_labels(self, axis):
+        axis.set_xlabel('Time')
+        axis.set_ylabel('Rate')
 
     @staticmethod
     def print_time_report(calc_time, t_init):
