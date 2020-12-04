@@ -83,7 +83,7 @@ class Window(QDialog, QMainWindow):
 
         df = read_my_data(''.join([sampleName]))
 
-        df['kval'] = np.zeros(len(df))
+        # df['kval'] = np.zeros(len(df))
 
         df['kval'] = [0, 0, 0] + [AvgNeighbourDiffSlopeDependent(df, i) for i in range(3, len(df) - 3)] + [0, 0, 0]
 
