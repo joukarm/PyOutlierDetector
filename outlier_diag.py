@@ -137,21 +137,6 @@ class Window(QDialog, QMainWindow):
         # save_plot(f)
         self.print_time_report(calc_time, t_init)
 
-    @staticmethod
-    def set_axes_labels(axes):
-        for axis in axes:
-            axis.set_xlabel('Time')
-            axis.set_ylabel('Rate')
-
-    @staticmethod
-    def print_time_report(calc_time, t_init):
-        overall_time = time.time() - t_init
-        print(
-            f"Overall Time: {overall_time:.2f} Sec  |  Calculation Time: {calc_time:.2f} Sec "
-            f"({calc_time / overall_time * 100:.0f}%)  |  Other: {overall_time - calc_time:.2f} Sec"
-            f""
-        )
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
