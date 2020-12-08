@@ -66,8 +66,8 @@ def show_statistics(data_frame, sample_name):
     print("*" * 30)
     print(time.ctime())
     print("sampleName: " + sample_name)
-    print('kval STD DEV : ' + str(statistics.stdev(data_frame['kval'])))
-    print('kval MEAN Val: ' + str(statistics.mean(data_frame['kval'])))
+    print('kval STD DEV : ' + str(statistics.stdev(data_frame['dist'])))
+    print('kval MEAN Val: ' + str(statistics.mean(data_frame['dist'])))
     print("=" * 30 + "\n")
 
 
@@ -76,7 +76,7 @@ def print_time_report(calc_time, t_init):
     print(
         f"Overall Time: {overall_time:.2f} Sec  |  Calculation Time: {calc_time:.2f} Sec "
         f"({calc_time / overall_time * 100:.0f}%)  |  Other: {overall_time - calc_time:.2f} Sec"
-        f""
+        f"\n"
     )
 
 
@@ -103,13 +103,13 @@ if __name__ == "__main__":
 
         df = read_my_data(''.join([sampleName]))
 
-        # df['kval'] = np.zeros(len(df))
+        # df['dist'] = np.zeros(len(df))
 
         # for i in range(3, len(df) - 3):
         #     myval = AvgNeighbourDiffSlopeDependent(df, i)
-        #     df['kval'][i] = myval
-        df['kval'] = [0] * 3 + [AvgNeighbourDiffSlopeDependent(df, i) for i in range(3, len(df) - 3)] + [0] * 3
-        df['kval'] = df['kval'] / max(df['kval'])
+        #     df['dist'][i] = myval
+        df['dist'] = [0] * 3 + [AvgNeighbourDiffSlopeDependent(df, i) for i in range(3, len(df) - 3)] + [0] * 3
+        df['dist'] = df['dist'] / max(df['dist'])
 
         show_statistics(df, sampleName)
 
@@ -129,12 +129,12 @@ if __name__ == "__main__":
         set_plot_window_props(f, plt)
 
         ax1.scatter(df['time'], df['rate'], color='green', s=5, label='All Production Data')
-        ax1.scatter(dfnew['time'], dfnew['rate'], marker='o', c='red', alpha=0.4, s=dfnew['kval'] * 50)
+        ax1.scatter(dfnew['time'], dfnew['rate'], marker='o', c='red', alpha=0.4, s=dfnew['dist'] * 50)
 
         ax2.plot(df['time'], df['rate'], label='All Production Data')
         ax2.scatter(dfnew['time'], dfnew['rate'], label=f"Outliers ({len(dfnew)}/{len(df)})", marker='o', c='red',
                     alpha=0.4,
-                    s=dfnew['kval'] * 50)
+                    s=dfnew['dist'] * 50)
 
         ax3.scatter(dfNoOutlier['time'], dfNoOutlier['rate'], color='blue', marker='o', s=5,
                     label='Production Data Without Outliers')
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
         ax4.plot(dfNoOutlier['time'], dfNoOutlier['rate'], label='Production Data Without Outliers')
         ax4.scatter(dfnew['time'], dfnew['rate'], color='red', label=f"Outliers ({len(dfnew)}/{len(df)})", marker='+',
-                    s=dfnew['kval'] * 50)
+                    s=dfnew['dist'] * 50)
 
         set_all_legends(f)
         save_plot(f)
@@ -158,17 +158,17 @@ if __name__ == "__main__":
             ax2.scatter(df['time'], df['rate'], color='blue', label='All Production Data')
 
             ax3.set_title('Production Scatter Plot and Neighbour Error Values')
-            ax3.scatter(dfnew['time'], dfnew['kval'], color='red', label='K-Error')
+            ax3.scatter(dfnew['time'], dfnew['dist'], color='red', label='K-Error')
             ax32 = ax3.twinx()
             ax32.scatter(df['time'], df['rate'], color='green', label='Production Data')
             # ax3.legend(loc='upper left')
             # set_legend_location(ax32)
 
             ax4.set_title('Production Scatter Plot with Marker size Presenting The Error')
-            ax4.scatter(df['time'], df['rate'], color='green', s=df['kval'] * 50, label='All Production Data')
+            ax4.scatter(df['time'], df['rate'], color='green', s=df['dist'] * 50, label='All Production Data')
 
             ax5.scatter(df['time'], df['rate'], color='green', s=5)
-            ax5.scatter(dfnew['time'], dfnew['rate'], color='red', label='K-Error', s=dfnew['kval'] * 50)
+            ax5.scatter(dfnew['time'], dfnew['rate'], color='red', label='K-Error', s=dfnew['dist'] * 50)
 
             set_all_legends(ff)
         #######################################################################################################

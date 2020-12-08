@@ -7,6 +7,7 @@ Created on Wed Nov 11 20:04:58 2020
 
 import statistics
 import numpy as np
+from math import sqrt
 
 
 def AvgNeighbourDiff(dfProduction, index):
@@ -52,10 +53,45 @@ def AvgNeighbourDiffSlopeDependent(dfProduction, index):
 
 
 def GetOutliersUsingStdDevMultiplier(df, stdDevMultiplier):
-    errMargin = statistics.mean(df['kval']) + statistics.stdev(df['kval']) * stdDevMultiplier
-    return df[df.kval > errMargin]
+    errMargin = statistics.mean(df['dist']) + statistics.stdev(df['dist']) * stdDevMultiplier
+    return df[df.dist > errMargin]
 
 
 def GetOutliersUsingPercentile(df, TopOutliersPercentageToRemove):
-    errMargin = np.percentile(a=df['kval'], q=100 - TopOutliersPercentageToRemove)
-    return df[df.kval > errMargin]
+    errMargin = np.percentile(a=df['dist'], q=100 - TopOutliersPercentageToRemove)
+    return df[df.dist > errMargin]
+
+
+def kth_nearest_distances(dataset, datapoint, k=2, restrict_neighbours=True):
+    src = []
+    mult = 0.1
+    while len(src) <= k:
+        src = dataset
+        if restrict_neighbours:
+            x_tol = (max(dataset.time) - min(dataset.time)) * mult
+            y_tol = (max(dataset.rate) - min(dataset.rate)) * mult
+            src = dataset[((dataset.time > datapoint[0] - x_tol) & (dataset.time < datapoint[0] + x_tol)) & (
+                    (dataset.rate > datapoint[1] - y_tol) & (dataset.rate < datapoint[1] + y_tol))]
+            # dataset = src
+            mult += 0.1
+        else:
+            src = dataset
+
+    if len(src) == 0:
+        src = dataset
+
+    # distances = []
+    # for v in src.values:
+    #     distances.append(euclidean_distance(datapoint[0], datapoint[1], v[0], v[1]))
+
+    distances = [euclidean_distance(datapoint[0], datapoint[1], v[0], v[1]) for v in src.values]
+
+    # for v in src.values:
+    #     distances.append(euclidean_distance(datapoint[0], datapoint[1], v[0], v[1]))
+
+    sorted_distances = sorted(distances)
+    return sorted_distances[int(k)]
+
+
+def euclidean_distance(x1, y1, x2, y2):
+    return sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
