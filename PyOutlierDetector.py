@@ -49,6 +49,8 @@ class Window(QDialog, QMainWindow):
         self.plot_info.setMaximumHeight(20)
 
         self.button = QPushButton('Plot')
+        self.empty = QLabel("")
+
         # self.button.clicked.connect(self.plot)
         self.button.clicked.connect(
             lambda: self.my_outlier_plot(self.cbcases.currentText()))
@@ -91,7 +93,14 @@ class Window(QDialog, QMainWindow):
         vlayout.addLayout(h_layout_stddevmult, 1)
         vlayout.addLayout(h_layout_NN1, 1)
         vlayout.addLayout(h_layout_NN2, 1)
-        vlayout.addWidget(self.button)
+
+        h_layout_button = QHBoxLayout()
+        h_layout_button.addWidget(self.empty)
+        h_layout_button.addWidget(self.button)
+        vlayout.addLayout(h_layout_button, 1)
+
+        # vlayout.addWidget(self.empty)
+        # vlayout.addWidget(self.button)
 
         self.setLayout(vlayout)
         # self.plot()
